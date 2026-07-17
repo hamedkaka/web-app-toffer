@@ -1,0 +1,81 @@
+name: Deploy soonpay web
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Never let two deploys write to the web root at once.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  # Files land here on the server; rsync creates the `web` folder if absent.
+  DEPLOY_PATH: /home/menu-app/webapp/web
+
+jobs:
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files are present
+        run: |
+          missing=0
+          for f in index.html main.dart.js flutter.js flutter_bootstrap.js \
+                   flutter_service_worker.js manifest.json version.json; do
+            [ -f "$f" ] || { echo "::error file=$f::missing from the build"; missing=1; }
+          done
+          [ -d assets ]    || { echo "::error::assets/ is missing";    missing=1; }
+          [ -d canvaskit ] || { echo "::error::canvaskit/ is missing"; missing=1; }
+          exit $missing
+
+      - name: Load SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pin the host key instead of trusting it on first connect, so a
+          # spoofed host can't quietly receive the deploy.
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Rsync to web root
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+          rsync -az --delete \
+            --exclude '.git*' \
+            --exclude '.github' \
+            --exclude '.qodo' \
+            --exclude '.last_build_id' \
+            --exclude '__MACOSX' \
+            -e "ssh -p $SSH_PORT" \
+            ./ "$SSH_USER@$SSH_HOST:${DEPLOY_PATH%/}/"
+
+      - name: Smoke check
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SITE_URL:-}" ]; then
+            echo "::notice::SITE_URL not set, skipping smoke check"
+            exit 0
+          fi
+          for path in / /main.dart.js /flutter_bootstrap.js; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 "${SITE_URL%/}$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || { echo "::error::$path returned $code"; exit 1; }
+          done
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "- version: \`$(jq -r .version version.json)+$(jq -r .build_number version.json)\`" >> $GITHUB_STEP_SUMMARY
+          echo "- commit: \`${GITHUB_SHA::8}\`" >> $GITHUB_STEP_SUMMARY

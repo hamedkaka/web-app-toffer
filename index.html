@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+      If you are serving your web app in a path other than the root, change the
+      href value below to reflect the base path you are serving from.
+
+      The path provided below has to start and end with a slash "/" in order for
+      it to work correctly.
+
+      For more details:
+      * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+      This is a placeholder for base href that will be replaced by the value of
+      the `--base-href` argument provided to `flutter build`.
+    -->
+    <base href="/">
+
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="description" content="Toffer - Smart restaurant payments">
+
+    <!-- Speed up the CanvasKit download (served from gstatic) -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+    <!-- Start fetching the app bootstrap and loading-screen assets ASAP -->
+    <link rel="preload" href="flutter_bootstrap.js" as="script">
+    <link rel="preload" href="icons/Icon-192.png" as="image">
+    <link rel="preload" href="home_bg.png" as="image">
+
+    <!-- iOS meta tags & icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Toffer">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png"/>
+
+    <title>Toffer</title>
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        min-height: 100vh;
+        background: radial-gradient(120% 90% at 50% 0%, #07B6C6 0%, #03909F 45%, #026E7B 100%);
+      }
+
+      /* Decorative food-shape pattern behind everything */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url('home_bg.png');
+        background-repeat: repeat;
+        background-size: 420px auto;
+        opacity: 0.10;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(120% 90% at 50% 0%, #07B6C6 0%, #03909F 45%, #026E7B 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+        overflow: hidden;
+      }
+
+      /* Same shape pattern over the loading screen */
+      #loading-screen::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url('home_bg.png');
+        background-repeat: repeat;
+        background-size: 420px auto;
+        opacity: 0.12;
+        pointer-events: none;
+      }
+
+      #loading-screen .logo-wrap,
+      #loading-screen .loader {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Curved logo card with soft glow + gentle float */
+      .logo-wrap {
+        width: 132px;
+        height: 132px;
+        border-radius: 36px;
+        background: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 18px 45px rgba(0, 0, 0, 0.22),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+        animation: float 3.2s ease-in-out infinite;
+      }
+
+      /* Pulsing glow ring behind the logo card */
+      .logo-wrap::after {
+        content: "";
+        position: absolute;
+        inset: -18px;
+        border-radius: 48px;
+        background: radial-gradient(closest-side, rgba(255, 255, 255, 0.35), transparent);
+        opacity: 0.6;
+        z-index: -1;
+        animation: pulse 2.4s ease-in-out infinite;
+      }
+
+      #loading-screen img {
+        width: 92px;
+        height: 92px;
+        border-radius: 24px;
+        display: block;
+      }
+
+      /* Three bouncing dots */
+      .loader {
+        display: flex;
+        gap: 9px;
+      }
+
+      .loader span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ffffff;
+        opacity: 0.9;
+        animation: bounce 1.2s ease-in-out infinite;
+      }
+
+      .loader span:nth-child(2) { animation-delay: 0.18s; }
+      .loader span:nth-child(3) { animation-delay: 0.36s; }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.55; }
+        50% { transform: scale(1.12); opacity: 0.25; }
+      }
+
+      @keyframes bounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+        40% { transform: translateY(-12px); opacity: 1; }
+      }
+    </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="logo-wrap">
+      <img src="icons/Icon-192.png" alt="Toffer" />
+    </div>
+    <div class="loader">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('loading-screen');
+      if (!el) return;
+      el.style.opacity = '0';
+      setTimeout(function () { el.remove(); }, 300);
+    });
+  </script>
+</body>
+</html>

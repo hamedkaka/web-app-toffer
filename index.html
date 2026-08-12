@@ -163,6 +163,18 @@
         40% { transform: translateY(-12px); opacity: 1; }
       }
     </style>
+
+    <!--
+      Google Maps JavaScript API — google_maps_flutter_web renders through it,
+      so it has to be loaded before the app starts.
+
+      Replace YOUR_GOOGLE_MAPS_WEB_API_KEY with the web key (the one restricted
+      by HTTP referrer to the app's domains in Google Cloud Console). Until it
+      is set the address map renders blank on web; every other screen is
+      unaffected.
+    -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYmsxfC7E7jak-VCXAom3CKAPSDl9dqDw"></script>
 </head>
 <body>
   <div id="loading-screen">

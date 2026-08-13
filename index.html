@@ -20,6 +20,20 @@
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
     <meta name="description" content="Toffer - Smart restaurant payments">
 
+    <!--
+      Without this, mobile Safari lays the page out in a 980px virtual viewport
+      and then scales it down. Flutter paints to the real viewport, so the two
+      disagree: what you see and where your finger actually lands drift apart,
+      and taps near the middle of the screen hit nothing at all. `viewport-fit`
+      lets the app draw into the safe areas on notched iPhones.
+    -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- The modern spelling of the apple- tag below; both are kept. -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#03909F">
+
     <!-- Speed up the CanvasKit download (served from gstatic) -->
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.gstatic.com">
@@ -173,7 +187,7 @@
       is set the address map renders blank on web; every other screen is
       unaffected.
     -->
-    <script
+    <script defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYmsxfC7E7jak-VCXAom3CKAPSDl9dqDw"></script>
 </head>
 <body>

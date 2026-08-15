@@ -187,8 +187,14 @@
       is set the address map renders blank on web; every other screen is
       unaffected.
     -->
+    <!--
+      v=quarterly pins the stable channel. The default is `weekly`, which means
+      Google swaps the library under a shipped build every week — a regression
+      there lands on customers with nothing changed on our side, and mobile
+      Safari is where it shows up first.
+    -->
     <script defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYmsxfC7E7jak-VCXAom3CKAPSDl9dqDw"></script>
+      src="https://maps.googleapis.com/maps/api/js?v=quarterly&key=AIzaSyDYmsxfC7E7jak-VCXAom3CKAPSDl9dqDw"></script>
 </head>
 <body>
   <div id="loading-screen">

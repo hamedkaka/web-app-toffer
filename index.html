@@ -56,22 +56,39 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
+      /*
+        The load screen is a receipt printing itself. Toffer's whole subject is
+        the bill at the table, so the wait is dressed as the one artifact every
+        customer already recognises — paper, monospace ink, dot leaders, a torn
+        edge. No webfont is loaded here on purpose: the system monospace stack
+        is exactly the right voice AND costs zero bytes competing with the
+        CanvasKit download this screen exists to cover.
+      */
       * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        /* The ground is the app's own top-bar white, so the load screen and
+           the first painted frame sit on exactly the same surface. */
+        --ground: #FFFFFF;
+        --paper: #FFFCF4;
+        --ink: #063E45;
+        --ink-soft: #A9BEC1;
+        --accent: #03909F;
+        --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                "Liberation Mono", monospace;
+      }
 
       body {
         min-height: 100vh;
-        background: radial-gradient(120% 90% at 50% 0%, #07B6C6 0%, #03909F 45%, #026E7B 100%);
+        background: var(--ground);
       }
 
-      /* Decorative food-shape pattern behind everything */
+      /* The app's own food-shape texture, same as the home background */
       body::before {
         content: "";
         position: fixed;
         inset: 0;
-        background-image: url('home_bg.png');
-        background-repeat: repeat;
-        background-size: 420px auto;
-        opacity: 0.10;
+        background: url('home_bg.png') top center / 420px auto repeat;
         pointer-events: none;
         z-index: 0;
       }
@@ -79,102 +96,134 @@
       #loading-screen {
         position: fixed;
         inset: 0;
-        background: radial-gradient(120% 90% at 50% 0%, #07B6C6 0%, #03909F 45%, #026E7B 100%);
+        background: var(--ground);
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 40px;
+        padding: 24px;
         z-index: 9999;
-        transition: opacity 0.3s ease;
         overflow: hidden;
+        transition: opacity 0.34s ease, transform 0.34s ease;
       }
 
-      /* Same shape pattern over the loading screen */
+      /* Same texture over the loading screen */
       #loading-screen::before {
         content: "";
         position: absolute;
         inset: 0;
-        background-image: url('home_bg.png');
-        background-repeat: repeat;
-        background-size: 420px auto;
-        opacity: 0.12;
+        background: url('home_bg.png') top center / 420px auto repeat;
         pointer-events: none;
       }
 
-      #loading-screen .logo-wrap,
-      #loading-screen .loader {
+      /* The mask below clips box-shadow, so the lift lives on a wrapper. */
+      .slip {
         position: relative;
         z-index: 1;
+        filter:
+          drop-shadow(0 1px 2px rgba(3, 144, 159, 0.12))
+          drop-shadow(0 16px 30px rgba(3, 144, 159, 0.14));
+        animation: feed 0.7s cubic-bezier(.22, 1, .36, 1) both;
       }
 
-      /* Curved logo card with soft glow + gentle float */
-      .logo-wrap {
-        width: 132px;
-        height: 132px;
-        border-radius: 36px;
-        background: rgba(255, 255, 255, 0.14);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+      /* Paper strip with a torn zigzag at both ends. */
+      .receipt {
+        --zig: 13px;
+        width: min(74vw, 252px);
+        background: var(--paper);
+        padding: calc(32px + var(--zig)) 24px calc(30px + var(--zig));
+        text-align: center;
+        -webkit-mask:
+          conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg)
+            bottom / var(--zig) calc(var(--zig) / 2) repeat-x,
+          conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg)
+            top / var(--zig) calc(var(--zig) / 2) repeat-x,
+          linear-gradient(#000 0 0) center / 100%
+            calc(100% - var(--zig)) no-repeat;
+        mask:
+          conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg)
+            bottom / var(--zig) calc(var(--zig) / 2) repeat-x,
+          conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg)
+            top / var(--zig) calc(var(--zig) / 2) repeat-x,
+          linear-gradient(#000 0 0) center / 100%
+            calc(100% - var(--zig)) no-repeat;
+      }
+
+      .mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: block;
+        margin: 0 auto 18px;
+      }
+
+      .wordmark {
+        font-family: var(--mono);
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.4em;
+        text-indent: 0.42em; /* balances the trailing letter-space */
+        color: var(--ink);
+      }
+
+      .rule {
+        height: 0;
+        border-top: 1px dashed rgba(6, 62, 69, 0.22);
+        margin: 20px 0;
+      }
+
+      .lines { list-style: none; }
+
+      .lines li {
         display: flex;
         align-items: center;
-        justify-content: center;
-        box-shadow:
-          0 18px 45px rgba(0, 0, 0, 0.22),
-          inset 0 0 0 1px rgba(255, 255, 255, 0.18);
-        animation: float 3.2s ease-in-out infinite;
+        gap: 8px;
+        margin-bottom: 12px;
+        /* Each row wipes in left to right, the way a head lays down ink. */
+        animation: print 3.6s var(--d, 0s) infinite backwards;
       }
 
-      /* Pulsing glow ring behind the logo card */
-      .logo-wrap::after {
-        content: "";
-        position: absolute;
-        inset: -18px;
-        border-radius: 48px;
-        background: radial-gradient(closest-side, rgba(255, 255, 255, 0.35), transparent);
-        opacity: 0.6;
-        z-index: -1;
-        animation: pulse 2.4s ease-in-out infinite;
+      .lines li:last-child { margin-bottom: 0; }
+
+      .tag, .amt {
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(6, 62, 69, 0.34);
       }
 
-      #loading-screen img {
-        width: 92px;
-        height: 92px;
-        border-radius: 24px;
-        display: block;
+      .dots {
+        flex: 1;
+        height: 6px;
+        color: var(--ink-soft);
+        background-image: radial-gradient(currentColor 1px, transparent 1.3px);
+        background-size: 6px 6px;
+        background-position: 0 center;
+        background-repeat: repeat-x;
       }
 
-      /* Three bouncing dots */
-      .loader {
-        display: flex;
-        gap: 9px;
+      /* The last row is the total: heavier, in brand ink. */
+      .total .tag, .total .amt {
+        height: 7px;
+        background: var(--accent);
       }
 
-      .loader span {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #ffffff;
-        opacity: 0.9;
-        animation: bounce 1.2s ease-in-out infinite;
+      .total .dots { opacity: 0; }
+
+      @keyframes print {
+        0%, 6%   { clip-path: inset(0 100% 0 0); }
+        20%, 88% { clip-path: inset(0 0 0 0); }
+        100%     { clip-path: inset(0 100% 0 0); }
       }
 
-      .loader span:nth-child(2) { animation-delay: 0.18s; }
-      .loader span:nth-child(3) { animation-delay: 0.36s; }
-
-      @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+      /* The slip drops in from the printer once, on first paint. */
+      @keyframes feed {
+        from { opacity: 0; transform: translateY(-22px); }
+        to   { opacity: 1; transform: none; }
       }
 
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.55; }
-        50% { transform: scale(1.12); opacity: 0.25; }
-      }
-
-      @keyframes bounce {
-        0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
-        40% { transform: translateY(-12px); opacity: 1; }
+      @media (prefers-reduced-motion: reduce) {
+        .slip { animation: none; }
+        .lines li { animation: none; }
+        #loading-screen { transition: opacity 0.34s ease; }
       }
     </style>
 
@@ -198,13 +247,46 @@
 </head>
 <body>
   <div id="loading-screen">
-    <div class="logo-wrap">
-      <img src="icons/Icon-192.png" alt="Toffer" />
-    </div>
-    <div class="loader">
-      <span></span>
-      <span></span>
-      <span></span>
+    <div class="slip" role="status" aria-label="Loading Toffer">
+      <div class="receipt">
+        <img class="mark" src="icons/Icon-192.png" alt="" />
+        <p class="wordmark">TOFFER</p>
+
+        <div class="rule"></div>
+
+        <ul class="lines" aria-hidden="true">
+          <li style="--d: 0s">
+            <i class="tag" style="width: 44%"></i>
+            <i class="dots"></i>
+            <i class="amt" style="width: 15%"></i>
+          </li>
+          <li style="--d: .28s">
+            <i class="tag" style="width: 30%"></i>
+            <i class="dots"></i>
+            <i class="amt" style="width: 18%"></i>
+          </li>
+          <li style="--d: .56s">
+            <i class="tag" style="width: 37%"></i>
+            <i class="dots"></i>
+            <i class="amt" style="width: 13%"></i>
+          </li>
+          <li style="--d: .84s">
+            <i class="tag" style="width: 25%"></i>
+            <i class="dots"></i>
+            <i class="amt" style="width: 16%"></i>
+          </li>
+        </ul>
+
+        <div class="rule"></div>
+
+        <ul class="lines" aria-hidden="true">
+          <li class="total" style="--d: 1.18s">
+            <i class="tag" style="width: 27%"></i>
+            <i class="dots"></i>
+            <i class="amt" style="width: 22%"></i>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -215,7 +297,8 @@
       var el = document.getElementById('loading-screen');
       if (!el) return;
       el.style.opacity = '0';
-      setTimeout(function () { el.remove(); }, 300);
+      el.style.transform = 'scale(1.04)';
+      setTimeout(function () { el.remove(); }, 340);
     });
   </script>
 </body>

@@ -150440,7 +150440,7 @@ f=B.e.a9(e.aDR(b),2)
 j=g?d:j.DR(B.eD,B.T)
 k.push(A.Z(A.a([p,A.v("$"+f,d,d,d,d,d,j,d,d)],i),B.j,B.ae,B.i,0,d))
 if(e.gaci()>0){$.o.toString
-k.push(new A.ks(A.n("Tip",d,"tip",A.a([],h),d)+" ("+A.d(e.d)+"%)","$"+B.e.a9(e.gaci(),2),d,!1,d,d))}return A.J(d,A.a1(k,B.j,B.f,B.i,10),B.h,d,d,new A.S(r,d,d,l,d,d,d,B.m),d,d,d,d,B.dn,d,d,d)},
+k.push(new A.ks(A.n("Tip",d,"tip",A.a([],h),d)+" ("+A.d(e.d)+"%)","+$"+B.e.a9(e.gaci(),2),d,!1,d,d))}return A.J(d,A.a1(k,B.j,B.f,B.i,10),B.h,d,d,new A.S(r,d,d,l,d,d,d,B.m),d,d,d,d,B.dn,d,d,d)},
 ayi(a,b){var s,r,q,p,o,n,m,l,k,j,i,h,g,f=null,e=b.c,d=e==null,c=d?f:e.a
 if(c==null)c=0
 s=b.y
@@ -150490,7 +150490,7 @@ if(s>0){r=this.d
 j=$.o
 if(r!=null){j.toString
 r=A.n("Tip",f,"tip",A.a([],k),f)+" ("+A.d(this.d)+"%)"}else{j.toString
-r=A.n("Tip",f,"tip",A.a([],k),f)}d.push(new A.ks(r,"$"+B.e.a9(s,2),f,!1,f,f))}return A.J(f,A.a1(d,B.j,B.f,B.i,10),B.h,f,f,new A.S(q,f,f,l,f,f,f,B.m),f,f,f,f,B.dn,f,f,f)}}
+r=A.n("Tip",f,"tip",A.a([],k),f)}d.push(new A.ks(r,"+$"+B.e.a9(s,2),f,!1,f,f))}return A.J(f,A.a1(d,B.j,B.f,B.i,10),B.h,f,f,new A.S(q,f,f,l,f,f,f,B.m),f,f,f,f,B.dn,f,f,f)}}
 A.bf0.prototype={
 $1(a){return this.a.qb()},
 $S:6}
